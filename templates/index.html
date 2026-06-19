@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cafetería - Control de Ingresos y Egresos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-top">
+                <h1>☕ Cafetería</h1>
+                <div class="user-menu">
+                    <span id="user-name">👤</span>
+                    <a href="/logout" class="btn-logout">🚪</a>
+                </div>
+            </div>
+            <div class="fecha-actual" id="fecha-actual"></div>
+        </header>
+
+        <!-- Navegación principal -->
+        <nav class="main-nav">
+            <button class="nav-btn active" data-section="registro">📝 Registrar</button>
+            <button class="nav-btn" data-section="resumen">📊 Resumen Hoy</button>
+            <button class="nav-btn" data-section="bolsillos">👛 Bolsillos</button>
+            <button class="nav-btn" data-section="config">⚙️ Config</button>
+        </nav>
+
+        <!-- Sección: Registro -->
+        <section id="registro" class="section active">
+            <div class="tipo-selector">
+                <button class="tipo-btn active" data-tipo="ingreso">💰 INGRESO</button>
+                <button class="tipo-btn" data-tipo="egreso">💸 EGRESO</button>
+            </div>
+
+            <form id="transaccion-form">
+                <!-- BOLSILLO (CAJA) - PRIMERO Y OBLIGATORIO -->
+                <div class="form-group bolsillo-group">
+                    <label>👛 Bolsillo (Caja) *</label>
+                    <div class="bolsillo-selector">
+                        <button type="button" class="bolsillo-btn" data-bolsillo="Efectivo">
+                            <span class="bolsillo-icon">💵</span>
+                            <span class="bolsillo-nombre">Efectivo</span>
+                        </button>
+                        <button type="button" class="bolsillo-btn" data-bolsillo="Nequi">
+                            <span class="bolsillo-icon">📱</span>
+                            <span class="bolsillo-nombre">Nequi</span>
+                        </button>
+                        <button type="button" class="bolsillo-btn" data-bolsillo="Bancolombia">
+                            <span class="bolsillo-icon">🏦</span>
+                            <span class="bolsillo-nombre">Bancolombia</span>
+                        </button>
+                    </div>
+                    <input type="hidden" id="bolsillo" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Monto ($) *</label>
+                    <input type="text" id="monto" inputmode="decimal" pattern="[0-9]*" required 
+                           placeholder="0" style="font-size: 1.5rem; text-align: right;">
+                </div>
+
+                <div class="form-group">
+                    <label>Categoría *</label>
+                    <select id="categoria" required>
+                        <option value="">Selecciona categoría...</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="subcategoria-group" style="display:none;">
+                    <label>Detalle</label>
+                    <input type="text" id="subcategoria" placeholder="Ej: Café, Leche, etc.">
+                </div>
+
+                <div class="form-group">
+                    <label>Descripción (opcional)</label>
+                    <input type="text" id="descripcion" placeholder="Nota adicional...">
+                </div>
+
+                <button type="submit" class="btn-guardar">✅ GUARDAR</button>
+            </form>
+
+            <div class="ultimas-transacciones">
+                <h3>🕐 Últimas transacciones hoy</h3>
+                <div id="lista-transacciones" class="lista-transacciones">
+                    <p class="empty">No hay transacciones hoy</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección: Resumen Diario -->
+        <section id="resumen" class="section">
+            <div class="resumen-cards">
+                <div class="card ingresos">
+                    <div class="card-label">Ingresos Hoy</div>
+                    <div class="card-amount" id="total-ingresos">$0</div>
+                </div>
+                <div class="card egresos">
+                    <div class="card-label">Egresos Hoy</div>
+                    <div class="card-amount" id="total-egresos">$0</div>
+                </div>
+                <div class="card balance">
+                    <div class="card-label">Balance Hoy</div>
+                    <div class="card-amount" id="balance-hoy">$0</div>
+                </div>
+            </div>
+
+            <div class="detalle-resumen">
+                <div class="detalle-columna">
+                    <h3>📥 Ingresos</h3>
+                    <div id="detalle-ingresos" class="detalle-lista"></div>
+                </div>
+                <div class="detalle-columna">
+                    <h3>📤 Egresos</h3>
+                    <div id="detalle-egresos" class="detalle-lista"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección: Bolsillos -->
+        <section id="bolsillos" class="section">
+            <h2>👛 Tus Bolsillos</h2>
+            <p class="info-text">Saldo acumulado en cada caja</p>
+            <div id="bolsillos-cards" class="bolsillos-grid">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </section>
+
+        <!-- Sección: Reportes Mensuales -->
+        <section id="reportes" class="section">
+            <div class="form-group">
+                <label>Mes a consultar</label>
+                <input type="month" id="mes-reporte" value="">
+            </div>
+
+            <div class="resumen-cards">
+                <div class="card ingresos">
+                    <div class="card-label">Total Ingresos</div>
+                    <div class="card-amount" id="reporte-ingresos">$0</div>
+                </div>
+                <div class="card egresos">
+                    <div class="card-label">Total Egresos</div>
+                    <div class="card-amount" id="reporte-egresos">$0</div>
+                </div>
+                <div class="card balance">
+                    <div class="card-label">Balance Mes</div>
+                    <div class="card-amount" id="reporte-balance">$0</div>
+                </div>
+            </div>
+
+            <div class="reporte-bolsillos">
+                <h3>Por Bolsillo</h3>
+                <div id="reporte-bolsillos-mes" class="detalle-lista"></div>
+            </div>
+
+            <div class="reporte-graficos">
+                <div class="grafico-container">
+                    <h3>Ingresos por día</h3>
+                    <div id="grafico-ingresos-dias" class="barras-container"></div>
+                </div>
+                <div class="grafico-container">
+                    <h3>Egresos por día</h3>
+                    <div id="grafico-egresos-dias" class="barras-container"></div>
+                </div>
+            </div>
+
+            <div class="reporte-categorias">
+                <div class="categorias-columna">
+                    <h3>Ingresos por categoría</h3>
+                    <div id="reporte-cat-ingresos"></div>
+                </div>
+                <div class="categorias-columna">
+                    <h3>Egresos por categoría</h3>
+                    <div id="reporte-cat-egresos"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección: Configuración -->
+        <section id="config" class="section">
+            <h2>⚙️ Configuración</h2>
+            
+            <div class="config-tabs">
+                <button class="config-tab active" data-tab="categorias">📂 Categorías</button>
+                <button class="config-tab" data-tab="bolsillos-config">👛 Bolsillos</button>
+                <button class="config-tab" data-tab="usuarios" id="tab-btn-usuarios" style="display:none;">👥 Usuarios</button>
+            </div>
+
+            <!-- Tab: Categorías -->
+            <div id="tab-categorias" class="config-panel active">
+                <div class="form-group">
+                    <label>Tipo</label>
+                    <select id="config-tipo-cat">
+                        <option value="ingreso">Ingreso</option>
+                        <option value="egreso">Egreso</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nombre de la categoría</label>
+                    <input type="text" id="nueva-categoria" placeholder="Ej: Propinas, Propaganda...">
+                </div>
+                <button class="btn-secundario" id="btn-agregar-cat">➕ Agregar Categoría</button>
+                
+                <div class="lista-config">
+                    <h3>Categorías de Ingresos</h3>
+                    <div id="lista-cat-ingresos" class="config-lista"></div>
+                </div>
+                <div class="lista-config">
+                    <h3>Categorías de Egresos</h3>
+                    <div id="lista-cat-egresos" class="config-lista"></div>
+                </div>
+            </div>
+
+            <!-- Tab: Bolsillos -->
+            <div id="tab-bolsillos-config" class="config-panel">
+                <div class="form-group">
+                    <label>Nombre del bolsillo</label>
+                    <input type="text" id="nuevo-bolsillo" placeholder="Ej: Daviplata, Ahorro...">
+                </div>
+                <div class="form-group">
+                    <label>Icono</label>
+                    <select id="bolsillo-icono">
+                        <option value="💵">💵 Dinero</option>
+                        <option value="📱">📱 App</option>
+                        <option value="🏦">🏦 Banco</option>
+                        <option value="💳">💳 Tarjeta</option>
+                        <option value="🪙">🪙 Monedas</option>
+                        <option value="📦">📦 Caja</option>
+                    </select>
+                </div>
+                <button class="btn-secundario" id="btn-agregar-bolsillo">➕ Agregar Bolsillo</button>
+                
+                <div class="lista-config">
+                    <h3>Bolsillos Activos</h3>
+                    <div id="lista-bolsillos" class="config-lista"></div>
+                </div>
+            </div>
+
+            <!-- Tab: Usuarios (solo superuser) -->
+            <div id="tab-usuarios" class="config-panel">
+                <div id="usuarios-superuser" style="display:none;">
+                    <div class="form-group">
+                        <label>Nombre de usuario</label>
+                        <input type="text" id="nuevo-username" placeholder="Ej: maria, carlos...">
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="text" id="nuevo-password" placeholder="Mínimo 4 caracteres">
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="nuevo-is-superuser">
+                        <label for="nuevo-is-superuser" style="display:inline; margin-bottom:0;">
+                            Es superusuario (puede crear otros usuarios)
+                        </label>
+                    </div>
+                    <button type="button" class="btn-secundario" id="btn-agregar-user">➕ Crear Usuario</button>
+                    
+                    <div class="lista-config">
+                        <h3>Usuarios del sistema</h3>
+                        <div id="lista-usuarios" class="config-lista"></div>
+                    </div>
+                </div>
+                <div id="usuarios-no-superuser" style="display:none;">
+                    <p class="empty">Solo los superusuarios pueden gestionar usuarios.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Toast para notificaciones -->
+    <div id="toast" class="toast"></div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=2"></script>
+</body>
+</html>

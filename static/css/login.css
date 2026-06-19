@@ -1,0 +1,123 @@
+/* ===== LOGIN STYLES ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #6B4423 0%, #8B6914 100%);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+.login-card {
+    background: white;
+    border-radius: 24px;
+    padding: 40px 30px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+.login-icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+}
+
+.login-card h1 {
+    color: #6B4423;
+    font-size: 1.6rem;
+    margin-bottom: 4px;
+}
+
+.login-subtitle {
+    color: #888;
+    font-size: 0.9rem;
+    margin-bottom: 28px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 6px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #6B4423;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #6B4423 0%, #8B6914 100%);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    box-shadow: 0 4px 12px rgba(107, 68, 35, 0.3);
+}
+
+.btn-login:active {
+    transform: scale(0.98);
+}
+
+.login-error {
+    display: none;
+    background: #ffebee;
+    color: #c62828;
+    padding: 12px;
+    border-radius: 10px;
+    margin-top: 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.login-info {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.login-info p {
+    margin-bottom: 4px;
+}
+
+/* Touch optimization */
+@media (pointer: coarse) {
+    .btn-login,
+    .form-group input {
+        min-height: 48px;
+    }
+}
