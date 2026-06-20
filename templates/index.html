@@ -265,6 +265,24 @@
                 <div id="usuarios-no-superuser" style="display:none;">
                     <p class="empty">Solo los superusuarios pueden gestionar usuarios.</p>
                 </div>
+                
+                <!-- Cambiar contraseña (todos los usuarios) -->
+                <div class="cambiar-password-section" style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
+                    <h3>🔐 Cambiar mi contraseña</h3>
+                    <div class="form-group">
+                        <label>Contraseña actual</label>
+                        <input type="password" id="password-actual" placeholder="Tu contraseña actual">
+                    </div>
+                    <div class="form-group">
+                        <label>Nueva contraseña</label>
+                        <input type="password" id="password-nueva" placeholder="Mínimo 4 caracteres">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirmar nueva contraseña</label>
+                        <input type="password" id="password-confirmar" placeholder="Repite la nueva contraseña">
+                    </div>
+                    <button type="button" class="btn-secundario" id="btn-cambiar-password">🔐 Cambiar Contraseña</button>
+                </div>
             </div>
         </section>
     </div>

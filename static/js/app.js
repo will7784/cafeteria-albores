@@ -201,7 +201,7 @@ async function loadRecentTransactions() {
     }
     
     container.innerHTML = transacciones.map(t => `
-        <div class="transaccion-item ${t.tipo}">
+        <div class="transaccion-item ${t.tipo}" data-id="${t.id}">
             <div class="transaccion-info">
                 <div class="transaccion-categoria">${t.categoria}</div>
                 <div class="transaccion-detalle">
@@ -210,8 +210,14 @@ async function loadRecentTransactions() {
                     ${new Date(t.fecha_hora).toLocaleTimeString('es-CO')}
                 </div>
             </div>
-            <div class="transaccion-monto ${t.tipo}">
-                ${t.tipo === 'ingreso' ? '+' : '-'}${formatMoney(t.monto)}
+            <div class="transaccion-actions">
+                <div class="transaccion-monto ${t.tipo}">
+                    ${t.tipo === 'ingreso' ? '+' : '-'}${formatMoney(t.monto)}
+                </div>
+                <div class="action-buttons">
+                    <button class="btn-action btn-edit" onclick="editarTransaccion(${t.id})" title="Editar">✏️</button>
+                    <button class="btn-action btn-delete" onclick="eliminarTransaccion(${t.id})" title="Eliminar">🗑️</button>
+                </div>
             </div>
         </div>
     `).join('');
@@ -576,6 +582,97 @@ async function eliminarBolsillo(id) {
         }
     } catch (error) {
         showToast('Error al eliminar', 'error');
+    }
+    // Cambiar contraseña
+    const btnCambiarPassword = document.getElementById('btn-cambiar-password');
+    if (btnCambiarPassword) {
+        btnCambiarPassword.addEventListener('click', async () => {
+            const passwordActual = document.getElementById('password-actual').value;
+            const passwordNueva = document.getElementById('password-nueva').value;
+            const passwordConfirmar = document.getElementById('password-confirmar').value;
+            
+            if (!passwordActual || !passwordNueva || !passwordConfirmar) {
+                showToast('Todos los campos son requeridos', 'error');
+                return;
+            }
+            
+            if (passwordNueva !== passwordConfirmar) {
+                showToast('Las contraseñas no coinciden', 'error');
+                return;
+            }
+            
+            if (passwordNueva.length < 4) {
+                showToast('La nueva contraseña debe tener al menos 4 caracteres', 'error');
+                return;
+            }
+            
+            try {
+                const response = await apiPost('/api/users/cambiar-password', {
+                    password_actual: passwordActual,
+                    password_nueva: passwordNueva
+                });
+                
+                if (response.success) {
+                    showToast('Contraseña cambiada exitosamente');
+                    document.getElementById('password-actual').value = '';
+                    document.getElementById('password-nueva').value = '';
+                    document.getElementById('password-confirmar').value = '';
+                } else {
+                    showToast(response.error || 'Error al cambiar contraseña', 'error');
+                }
+            } catch (error) {
+                showToast('Error al cambiar contraseña', 'error');
+            }
+        });
+    }
+}
+
+// ===== EDITAR / ELIMINAR TRANSACCIONES =====
+async function eliminarTransaccion(id) {
+    if (!confirm('¿Eliminar esta transacción?')) return;
+    
+    try {
+        const response = await fetch(`/api/transacciones/${id}`, { method: 'DELETE' });
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('Transacción eliminada');
+            loadRecentTransactions();
+            loadResumenDiario();
+            loadBolsillos();
+        } else {
+            showToast(data.error || 'No se pudo eliminar', 'error');
+        }
+    } catch (error) {
+        showToast('Error al eliminar', 'error');
+    }
+}
+
+async function editarTransaccion(id) {
+    const nuevoMonto = prompt('Ingresa el nuevo monto:');
+    if (!nuevoMonto || isNaN(parseFloat(nuevoMonto))) {
+        showToast('Monto inválido', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/transacciones/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ monto: parseFloat(nuevoMonto) })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('Transacción actualizada');
+            loadRecentTransactions();
+            loadResumenDiario();
+            loadBolsillos();
+        } else {
+            showToast(data.error || 'No se pudo actualizar', 'error');
+        }
+    } catch (error) {
+        showToast('Error al actualizar', 'error');
     }
 }
 

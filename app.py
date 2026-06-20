@@ -190,6 +190,26 @@ def delete_user(id):
     db.session.commit()
     return jsonify({'success': True})
 
+@app.route('/api/users/cambiar-password', methods=['POST'])
+@login_required
+def cambiar_password():
+    data = request.json
+    password_actual = data.get('password_actual')
+    password_nueva = data.get('password_nueva')
+    
+    if not password_actual or not password_nueva:
+        return jsonify({'success': False, 'error': 'Contraseña actual y nueva requeridas'})
+    
+    if len(password_nueva) < 4:
+        return jsonify({'success': False, 'error': 'La nueva contraseña debe tener al menos 4 caracteres'})
+    
+    if not current_user.check_password(password_actual):
+        return jsonify({'success': False, 'error': 'Contraseña actual incorrecta'})
+    
+    current_user.set_password(password_nueva)
+    db.session.commit()
+    return jsonify({'success': True})
+
 # ===== MAIN APP =====
 @app.route('/')
 @login_required
@@ -279,6 +299,34 @@ def crear_transaccion():
     db.session.commit()
     
     return jsonify({'success': True, 'id': nueva.id})
+
+@app.route('/api/transacciones/<int:id>', methods=['DELETE'])
+@login_required
+def eliminar_transaccion(id):
+    t = Transaccion.query.get(id)
+    if not t:
+        return jsonify({'success': False, 'error': 'Transacción no encontrada'})
+    db.session.delete(t)
+    db.session.commit()
+    return jsonify({'success': True})
+
+@app.route('/api/transacciones/<int:id>', methods=['PUT'])
+@login_required
+def editar_transaccion(id):
+    data = request.json
+    t = Transaccion.query.get(id)
+    if not t:
+        return jsonify({'success': False, 'error': 'Transacción no encontrada'})
+    
+    t.tipo = data.get('tipo', t.tipo)
+    t.bolsillo = data.get('bolsillo', t.bolsillo)
+    t.categoria = data.get('categoria', t.categoria)
+    t.subcategoria = data.get('subcategoria', t.subcategoria)
+    t.monto = data.get('monto', t.monto)
+    t.descripcion = data.get('descripcion', t.descripcion)
+    
+    db.session.commit()
+    return jsonify({'success': True})
 
 @app.route('/api/resumen-diario')
 @login_required
